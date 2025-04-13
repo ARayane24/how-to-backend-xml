@@ -1,0 +1,84 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="db" type="dbType" />
+    <xs:complexType name="dbType">
+        <xs:sequence>
+            <xs:element name="accounts" minOccurs="1" maxOccurs="1" type="accountsType" />
+            <xs:element name="userProfiles" minOccurs="1" maxOccurs="1" type="userProfilesType" />
+            <xs:element name="topics" minOccurs="1" maxOccurs="1" type="topicsType" />
+            <xs:element name="votes" minOccurs="1" maxOccurs="1" type="votesType" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="accountsType">
+        <xs:sequence>
+            <xs:element name="account" type="accountType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="userProfilesType">
+        <xs:sequence>
+            <xs:element name="userProfile" type="userProfileType" minOccurs="0"
+                maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="topicsType">
+        <xs:sequence>
+            <xs:element name="topic" type="topicType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="accountType">
+        <xs:sequence>
+            <xs:element name="userName" type="xs:string" />
+            <xs:element name="password" type="xs:string" />
+            <xs:element name="email" type="xs:string" />
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:integer" use="required" />
+    </xs:complexType>
+    <xs:complexType name="userProfileType">
+        <xs:sequence>
+            <xs:element name="firstName" type="xs:string" />
+            <xs:element name="midName" type="xs:string" />
+            <xs:element name="lastName" type="xs:string" />
+            <xs:element name="profilePicture" type="xs:string" />
+            <xs:element name="bio" type="xs:string" />
+            <xs:element name="joined" type="xs:date" />
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:integer" use="required" />
+        <xs:attribute name="idAccount" type="xs:integer" use="required" />
+    </xs:complexType>
+    <xs:complexType name="topicType">
+        <xs:sequence>
+            <xs:element name="problem" type="xs:string" />
+            <xs:element name="description" type="xs:string" />
+            <xs:element name="createdAt" type="xs:date" />
+            <xs:element name="updatedAt" type="xs:date" />
+            <xs:element name="steps" type="stepsType" />
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:integer" use="required" />
+        <xs:attribute name="idAccount" type="xs:integer" use="required" />
+    </xs:complexType>
+    <xs:complexType name="stepsType">
+        <xs:sequence>
+            <xs:element name="step" type="stepType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="stepType">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string" />
+            <xs:element name="description" type="xs:string" />
+            <xs:element name="updatedAt" type="xs:date" />
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:integer" use="required" />
+        <xs:attribute name="idTopic" type="xs:integer" use="required" />
+    </xs:complexType>
+    <xs:complexType name="votesType">
+        <xs:sequence>
+            <xs:element name="vote" type="voteType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="voteType">
+        <xs:sequence>
+            <xs:element name="isPositive" type="xs:boolean" />
+        </xs:sequence>
+        <xs:attribute name="idTopic" type="xs:integer" use="required" />
+        <xs:attribute name="idAccount" type="xs:integer" use="required" />
+    </xs:complexType>
+</xs:schema>

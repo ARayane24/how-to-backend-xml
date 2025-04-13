@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<db xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="schema.xsd">
+    <accounts>
+        <account id="0">
+            <userName></userName>
+            <password></password>
+            <email></email>
+        </account>
+    </accounts>
+    <userProfiles>
+        <userProfile id="0" idAccount="0">
+            <firstName></firstName>
+            <midName></midName>
+            <lastName></lastName>
+            <profilePicture></profilePicture>
+            <bio></bio>
+            <joined>2003-10-01</joined>
+        </userProfile>
+    </userProfiles>
+    <topics>
+        <topic id="0" idAccount="0">
+            <problem></problem>
+            <description></description>
+            <createdAt>2003-10-01</createdAt>
+            <updatedAt>2003-10-01</updatedAt>
+            <steps>
+                <step id="0" idTopic="0">
+                    <title></title>
+                    <description></description>
+                    <updatedAt>2003-10-01</updatedAt>
+                </step>
+            </steps>
+        </topic>
+    </topics>
+    <votes>
+        <vote idTopic="0" idAccount="0">
+            <isPositive>true</isPositive>
+        </vote>
+    </votes>
+</db>
