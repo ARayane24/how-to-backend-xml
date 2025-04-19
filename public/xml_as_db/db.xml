@@ -18,13 +18,26 @@
     </account>
   </accounts>
   <userProfiles>
-    <userProfile id="0" idAccount="0">
-      <firstName/>
-      <midName/>
-      <lastName/>
+    <userProfile id="2" idAccount="3">
+      <firstName>Peter</firstName>
+      <lastName>Jones</lastName>
       <profilePicture/>
-      <bio/>
-      <joined>2003-10-01</joined>
+      <bio>Enthusiast of open source.</bio>
+      <joined>2022-11-20</joined>
+    </userProfile>
+    <userProfile id="3" idAccount="4">
+      <firstName>Alice</firstName>
+      <lastName>Brown</lastName>
+      <profilePicture>alice_avatar.png</profilePicture>
+      <bio>Just learning XML.</bio>
+      <joined>2024-03-10</joined>
+    </userProfile>
+    <userProfile id="5" idAccount="1">
+      <firstName>Peter</firstName>
+      <lastName>Jones</lastName>
+      <profilePicture/>
+      <bio>Enthusiast of open source.</bio>
+      <joined>2025-04-19</joined>
     </userProfile>
   </userProfiles>
   <topics>
@@ -41,9 +54,82 @@
         </step>
       </steps>
     </topic>
+    <topic id="1" idAccount="1">
+      <problem>How to parse XML in PHP?</problem>
+      <description>Looking for the best way to read and write XML files using PHP.</description>
+      <createdAt>2023-05-10</createdAt>
+      <updatedAt>2023-05-11</updatedAt>
+      <steps>
+        <step id="1" idTopic="1">
+          <title>Use SimpleXML</title>
+          <description>SimpleXML provides an easy way to handle basic XML structures.</description>
+          <updatedAt>2023-05-11</updatedAt>
+        </step>
+        <step id="2" idTopic="1">
+          <title>Consider DOMDocument</title>
+          <description>For more complex XML manipulation, DOMDocument offers more control.</description>
+          <updatedAt>2023-05-12</updatedAt>
+        </step>
+      </steps>
+    </topic>
+    <topic id="2" idAccount="3">
+      <problem>Styling XML with CSS</problem>
+      <description>Is it possible to apply CSS styles directly to an XML document for browser
+        display?</description>
+      <createdAt>2024-01-20</createdAt>
+      <updatedAt>2024-01-20</updatedAt>
+      <steps>
+        <step id="3" idTopic="2">
+          <title>Use XSLT</title>
+          <description>The standard way is to use XSLT to transform XML into HTML, then style the
+            HTML with CSS.</description>
+          <updatedAt>2024-01-21</updatedAt>
+        </step>
+        <step id="4" idTopic="2">
+          <title>Direct CSS Styling (Limited)</title>
+          <description>Some browsers support applying CSS directly using xml-stylesheet processing
+            instruction, but compatibility varies.</description>
+          <updatedAt>2024-01-21</updatedAt>
+        </step>
+      </steps>
+    </topic>
+    <topic id="3" idAccount="4">
+      <problem>Validating XML against Schema</problem>
+      <description>How can I check if my XML document conforms to its XSD schema?</description>
+      <createdAt>2024-04-01</createdAt>
+      <updatedAt>2024-04-02</updatedAt>
+      <steps>
+        <step id="5" idTopic="3">
+          <title>Online Validators</title>
+          <description>Many websites offer free XML schema validation services.</description>
+          <updatedAt>2024-04-02</updatedAt>
+        </step>
+        <step id="6" idTopic="3">
+          <title>Use Libraries (e.g., libxml)</title>
+          <description>Programming languages often have libraries (like libxml in PHP or Python)
+            that can perform validation.</description>
+          <updatedAt>2024-04-02</updatedAt>
+        </step>
+        <step id="7" idTopic="3">
+          <title>XML Editors</title>
+          <description>Dedicated XML editors (like Oxygen XML, XMLSpy) usually have built-in
+            validation features.</description>
+          <updatedAt>2024-04-03</updatedAt>
+        </step>
+      </steps>
+    </topic>
   </topics>
   <votes>
     <vote idTopic="0" idAccount="0">
+      <isPositive>true</isPositive>
+    </vote>
+    <vote idTopic="1" idAccount="1">
+      <isPositive>true</isPositive>
+    </vote>
+    <vote idTopic="1" idAccount="3">
+      <isPositive>false</isPositive>
+    </vote>
+    <vote idTopic="2" idAccount="4">
       <isPositive>true</isPositive>
     </vote>
   </votes>

@@ -22,7 +22,7 @@ class DB_Utils
 
     public static function getXmlBlocks($xpathQuery)
     {
-        list($doc, $xpath) = DB_Utils::loadXml();
+        [$doc, $xpath] = DB_Utils::loadXml();
         $nodes = $xpath->query($xpathQuery);
 
         if ($nodes->length === 0) {

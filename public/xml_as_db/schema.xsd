@@ -35,7 +35,6 @@
     <xs:complexType name="userProfileType">
         <xs:sequence>
             <xs:element name="firstName" type="xs:string" />
-            <xs:element name="midName" type="xs:string" />
             <xs:element name="lastName" type="xs:string" />
             <xs:element name="profilePicture" type="xs:string" />
             <xs:element name="bio" type="xs:string" />
