@@ -5,7 +5,7 @@ namespace App\Utils;
 class DB_Utils
 {
     const FILE = "xml_as_db/db.xml";
-    private static function loadXml()
+    private static function LoadXml()
     {
         if (!file_exists(DB_Utils::FILE)) {
             throw new \Exception("File not found: " . DB_Utils::FILE);
@@ -22,7 +22,7 @@ class DB_Utils
 
     public static function getXmlBlocks($xpathQuery)
     {
-        list($doc, $xpath) = DB_Utils::loadXml(DB_Utils::FILE);
+        list($doc, $xpath) = DB_Utils::loadXml();
         $nodes = $xpath->query($xpathQuery);
 
         if ($nodes->length === 0) {
@@ -36,10 +36,49 @@ class DB_Utils
 
         return $blocks;
     }
+    public static function appendXmlBlock($xpathQuery, $xmlBlock)
+    {
+
+        try {
+            $xmlFile = public_path('xml_as_db\db.xml');
+            $doc = new \DOMDocument();
+            $doc->preserveWhiteSpace = false; // Optional: Remove unnecessary whitespace
+            $doc->formatOutput = true;     // Optional: Format the output XML nicely
+
+            if (!$doc->load($xmlFile)) {
+                throw new \Exception("Failed to load XML file: " . $xmlFile);
+            }
+
+            $xpath = new \DOMXPath($doc);
+            $nodes = $xpath->query($xpathQuery);
+
+            if ($nodes->length === 0) {
+                error_log("No target node found for XPath query: " . $xpathQuery);
+                return false;
+            }
+
+            // Assuming you want to append within the first matched node
+            $parentNode = $nodes->item(0);
+
+            $fragment = $doc->createDocumentFragment();
+            if (!$fragment->appendXML($xmlBlock)) {
+                throw new \Exception("Invalid XML block to add.");
+            }
+
+            $parentNode->appendChild($fragment);
+
+            return $doc->save($xmlFile) !== false;
+
+        } catch (\Exception $e) {
+            error_log("Error appending XML block: " . $e->getMessage());
+            return false;
+        }
+
+    }
 
     public static function editBlock($xpathQuery, $newXml)
     {
-        list($doc, $xpath) = DB_Utils::loadXml(DB_Utils::FILE);
+        [$doc, $xpath] = DB_Utils::loadXml();
         $nodes = $xpath->query($xpathQuery);
 
         if ($nodes->length === 0) {
@@ -55,26 +94,42 @@ class DB_Utils
         }
 
         $parent->replaceChild($fragment, $nodeToReplace);
-        $doc->save(DB_Utils::FILE);
+        if ($doc->save(DB_Utils::FILE) === false) {
+            throw new \Exception("Failed to save the XML file after removing nodes.");
+        }
     }
 
     public static function removeBlock($xpathQuery)
     {
-        list($doc, $xpath) = DB_Utils::loadXml(DB_Utils::FILE);
+        [$doc, $xpath] = DB_Utils::loadXml();
         $nodes = $xpath->query($xpathQuery);
 
-        foreach ($nodes as $node) {
-            $node->parentNode->removeChild($node);
+        if ($nodes === false) {
+            throw new \Exception("Invalid XPath query: " . $xpathQuery);
         }
 
-        $doc->save(DB_Utils::FILE);
+        if ($nodes->length === 0) {
+            throw new \Exception("No nodes found matching the query to remove: " . $xpathQuery);
+        }
+
+        foreach ($nodes as $node) {
+            if ($node->parentNode) {
+                $node->parentNode->removeChild($node);
+            } else {
+                throw new \Exception("Cannot remove the root node or a node without a parent.");
+            }
+        }
+        if ($doc->save(DB_Utils::FILE) === false) {
+            throw new \Exception("Failed to save the XML file after removing nodes.");
+        }
     }
 
-    public static function addBlock($xpathQuery, $newXml, $position = 'append')
+    public static function addBlock($xpathQuery, $newXml, $position = 'append'): bool
     {
-        list($doc, $xpath) = DB_Utils::loadXml(DB_Utils::FILE);
+        [$doc, $xpath] = DB_Utils::loadXml();
         $nodes = $xpath->query($xpathQuery);
 
+        error_log(print_r($nodes, TRUE));
         if ($nodes->length === 0) {
             throw new \Exception("No parent node found for adding block.");
         }
@@ -92,6 +147,6 @@ class DB_Utils
             $parent->appendChild($fragment);
         }
 
-        $doc->save(DB_Utils::FILE);
+        return $doc->save(DB_Utils::FILE) !== false;
     }
 }
