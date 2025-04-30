@@ -21,7 +21,7 @@
     <userProfile id="2" idAccount="3">
       <firstName>Peter</firstName>
       <lastName>Jones</lastName>
-      <profilePicture/>
+      <profilePicture />
       <bio>Enthusiast of open source.</bio>
       <joined>2022-11-20</joined>
     </userProfile>
@@ -35,21 +35,21 @@
     <userProfile id="5" idAccount="1">
       <firstName>Peter</firstName>
       <lastName>Jones</lastName>
-      <profilePicture/>
+      <profilePicture />
       <bio>Enthusiast of open source.</bio>
       <joined>2025-04-19</joined>
     </userProfile>
   </userProfiles>
   <topics>
     <topic id="0" idAccount="0">
-      <problem/>
-      <description/>
+      <problem />
+      <description />
       <createdAt>2003-10-01</createdAt>
       <updatedAt>2003-10-01</updatedAt>
       <steps>
         <step id="0" idTopic="0">
-          <title/>
-          <description/>
+          <title />
+          <description />
           <updatedAt>2003-10-01</updatedAt>
         </step>
       </steps>
