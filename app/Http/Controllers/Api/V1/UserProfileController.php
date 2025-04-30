@@ -31,10 +31,10 @@ class UserProfileController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+    // public function create()
+    // {
+    //     //
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -90,18 +90,18 @@ class UserProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(UserProfile $userProfile)
-    {
-        return new ProfileResource($userProfile);
-    }
+    // public function show(UserProfile $userProfile)
+    // {
+    //     return new ProfileResource($userProfile);
+    // }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(UserProfile $userProfile)
-    {
-        //
-    }
+    // public function edit(UserProfile $userProfile)
+    // {
+    //     //
+    // }
 
 
     /**
@@ -183,7 +183,7 @@ class UserProfileController extends Controller
             }
 
             DB_Utils::removeBlock("//userProfile[@id='$id']");
-            return response(null, 204)
+            return response(204)
                 ->header('Content-Type', 'application/xml');
 
         } catch (\Exception $e) {
