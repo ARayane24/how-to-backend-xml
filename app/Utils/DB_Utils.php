@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+
 class DB_Utils
 {
     const FILE = "xml_as_db/db.xml";
@@ -22,19 +23,30 @@ class DB_Utils
 
     public static function getXmlBlocks($xpathQuery)
     {
-        [$doc, $xpath] = DB_Utils::loadXml();
-        $nodes = $xpath->query($xpathQuery);
+        try {
+            [$doc, $xpath] = DB_Utils::LoadXml();
+            $nodes = $xpath->query($xpathQuery);
+            if ($nodes === false) {
+                throw new \Exception("Invalid XPath query: " . $xpathQuery);
+            }
 
-        if ($nodes->length === 0) {
-            return [];
+            if ($nodes->length === 0) {
+                return [];
+            }
+
+            $blocks = [];
+            foreach ($nodes as $node) {
+                $blocks[] = $doc->saveXML($node);
+                if ($blocks[count($blocks) - 1] === false) {
+                    throw new \Exception("Failed to save XML for node");
+                }
+            }
+
+            return $blocks;
+        } catch (\Exception $e) {
+            error_log("Error in getXmlBlocks: " . $e->getMessage());
+            throw $e;
         }
-
-        $blocks = [];
-        foreach ($nodes as $node) {
-            $blocks[] = $doc->saveXML($node);
-        }
-
-        return $blocks;
     }
     public static function appendXmlBlock($xpathQuery, $xmlBlock)
     {
@@ -68,12 +80,10 @@ class DB_Utils
             $parentNode->appendChild($fragment);
 
             return $doc->save($xmlFile) !== false;
-
         } catch (\Exception $e) {
             error_log("Error appending XML block: " . $e->getMessage());
             return false;
         }
-
     }
 
     public static function editBlock($xpathQuery, $newXml)

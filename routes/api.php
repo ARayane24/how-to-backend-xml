@@ -41,16 +41,21 @@ Route::group(
         Route::put('user-accounts/{id}', [AccountController::class, 'update'])->whereNumber('id');
         Route::delete('user-accounts/{id}', [AccountController::class, 'destroy'])->whereNumber('id');
         // topics
-        Route::apiResource('topics', TopicController::class);
+        // Route::apiResource('topics', TopicController::class);
 
         Route::get('topics', [TopicController::class, 'index']);
-        Route::get('topics{id}', [TopicController::class, 'show'])->whereNumber('id');
+        Route::get('topics/{id}', [TopicController::class, 'show'])->whereNumber('id');
         Route::post('topics', [TopicController::class, 'store']);
         Route::put('topics/{id}', [TopicController::class, 'update'])->whereNumber('id');
         Route::delete('topics/{id}', [TopicController::class, 'destroy'])->whereNumber('id');
-        // solution-steps
-        Route::apiResource('solution-steps', SolutionStepController::class);
+        // // solution-steps
+        // Route::apiResource('solution-steps', SolutionStepController::class);
         // votes
         Route::apiResource('votes', VoteController::class);
+        Route::get('votes', [VoteController::class, 'index']);
+        Route::get('votes/{id}/{idAccount?}', [VoteController::class, 'show'])->whereNumber('id', 'idAccount');
+        Route::post('votes', [VoteController::class, 'store']);
+        Route::put('votes/{id}/{idAccount}', [VoteController::class, 'update'])->whereNumber('id', 'idAccount');
+        Route::delete('votes/{id}/{idAccount}', [VoteController::class, 'destroy'])->whereNumber('id', 'idAccount');
     }
 );

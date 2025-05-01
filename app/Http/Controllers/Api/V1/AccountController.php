@@ -161,7 +161,7 @@ class AccountController extends Controller
 
             DB_Utils::removeBlock("//account[@id='$id']");
 
-            return response(null, 204)
+            return response( 204)
                 ->header('Content-Type', 'application/xml');
 
         } catch (\Exception $e) {

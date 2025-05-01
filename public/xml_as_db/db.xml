@@ -42,15 +42,15 @@
   </userProfiles>
   <topics>
     <topic id="0" idAccount="0">
-      <problem />
-      <description />
+      <problem>Sample Probllem</problem>
+      <description>Sample Description</description>
       <createdAt>2003-10-01</createdAt>
-      <updatedAt>2003-10-01</updatedAt>
+      <updatedAt>2025-05-01</updatedAt>
       <steps>
-        <step id="0" idTopic="0">
-          <title />
-          <description />
-          <updatedAt>2003-10-01</updatedAt>
+        <step id="1" idTopic="0">
+          <title>Step 1</title>
+          <description>Step 1 description</description>
+          <updatedAt>2025-05-01</updatedAt>
         </step>
       </steps>
     </topic>
@@ -121,7 +121,7 @@
   </topics>
   <votes>
     <vote idTopic="0" idAccount="0">
-      <isPositive>true</isPositive>
+      <isPositive> false</isPositive>
     </vote>
     <vote idTopic="1" idAccount="1">
       <isPositive>true</isPositive>

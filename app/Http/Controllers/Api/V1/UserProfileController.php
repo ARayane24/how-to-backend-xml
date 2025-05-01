@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreUserProfileRequest;
 use App\Http\Requests\UpdateUserProfileRequest;
 use App\Http\Resources\V1\ProfileCollection;
@@ -154,14 +155,11 @@ class UserProfileController extends Controller
 
                 return response($updatedProfile, 200)
                     ->header('Content-Type', 'application/xml');
-
-
             } catch (\Exception $e) {
                 error_log("Error parsing update XML for profile $id: " . $e->getMessage());
                 return response('<error>Invalid XML format in update data</error>', 400)
                     ->header('Content-Type', 'application/xml');
             }
-
         } catch (\Exception $e) {
             error_log("Error processing update request for profile $id: " . $e->getMessage());
             return response('<error>Failed to process update request</error>', 500)
@@ -185,7 +183,6 @@ class UserProfileController extends Controller
             DB_Utils::removeBlock("//userProfile[@id='$id']");
             return response(204)
                 ->header('Content-Type', 'application/xml');
-
         } catch (\Exception $e) {
             error_log("Error deleting user profile $id: " . $e->getMessage());
             return response('<error>Failed to process delete request</error>', 500)
