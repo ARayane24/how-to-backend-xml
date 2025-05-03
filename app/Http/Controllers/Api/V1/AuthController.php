@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Utils\DB_Utils;
+use App\Models\User;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
@@ -34,16 +37,16 @@ class AuthController extends Controller
         }
 
         try {
-            $xml = new \SimpleXMLElement($credentials);
+            $credXml = new \SimpleXMLElement($credentials);
 
-            if ((!isset($xml->userName) && !isset($xml->email)) || !isset($xml->password)) {
+            if ((!isset($credXml->userName) && !isset($credXml->email)) || !isset($credXml->password)) {
                 return response('<error>Missing required fields</error>', 400)
                     ->header('Content-Type', 'application/xml');
             }
 
-            $account = isset($xml->userName)
-                ? DB_Utils::getXmlBlocks(".//account[userName='$xml->userName' and password='$xml->password']")[0] ?? null
-                : DB_Utils::getXmlBlocks(".//account[email='$xml->email' and password='$xml->password']")[0] ?? null;
+            $account = isset($credXml->userName)
+                ? DB_Utils::getXmlBlocks(".//account[userName='$credXml->userName' and password='$credXml->password']")[0] ?? null
+                : DB_Utils::getXmlBlocks(".//account[email='$credXml->email' and password='$credXml->password']")[0] ?? null;
 
             if (!$account) {
                 return response('<error>Account not found</error>', 404)
@@ -51,24 +54,36 @@ class AuthController extends Controller
             }
 
             $xml = new \SimpleXMLElement($account);
+            log::debug($account);
+            $user = new User();
+            $user->id = (string) $xml->attributes()['id'];
+            $user->email = (string) $xml->email;
+            $user->userName = (string) $xml->userName;
             $current_time = time();
-
-            // Access token
-            $accessToken = base64_encode(json_encode([
-                'id' => (string) $xml->attributes()['id'],
-                'email' => $xml->userName ?? $xml->email,
-                'timestamp' => $current_time
-            ]));
+            try {
+                // Pass the User object to fromUser
+                $accessToken = JWTAuth::fromUser($user);
+                // Access token
+                // $accessToken = base64_encode(json_encode([
+                //     'id' => (string) $xml->attributes()['id'],
+                //     'timestamp' => $current_time
+                // ]));
+            } catch (JWTException $e) {
+                return response('<error>Error Generating token</error>', 500)
+                    ->header('Content-Type', 'application/xml');
+            }
 
             // Refresh token
-            $refreshToken = base64_encode(json_encode([
-                'id' => (string) $xml->attributes()['id'],
-                'email' => $xml->userName ?? $xml->email,
-                'timestamp' => $current_time,
-                'expires_at' => $current_time + (60 * 60),
-                'type' => 'refresh'
-            ]));
-
+            // $refreshToken = base64_encode(json_encode([
+            //     'id' => (string) $xml->attributes()['id'],
+            //     'email' => $xml->userName ?? $xml->email,
+            //     'timestamp' => $current_time,
+            //     'expires_at' => $current_time + (60 * 60),
+            //     'type' => 'refresh'
+            // ]));
+            Auth::factory()->setTTL(20160);
+            $refreshToken = JWTAuth::fromUser($user);
+            Auth::factory()->setTTL(config('jwt.ttl', 60));
             $response = json_decode($this->respondWithToken($accessToken)->getContent(), true);
 
             $auth = "<auth accountId=\"" . $xml->attributes()['id'] . "\">\n" .

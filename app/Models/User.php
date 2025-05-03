@@ -22,14 +22,21 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->getKey();
     }
+    public function getJWTCustomClaims()
+    {
+        return [
+            'userName' => $this->userName,
+            'email' => $this->email,
+        ];
+    }
 
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
      * @return array
      */
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
+    // public function getJWTCustomClaims()
+    // {
+    //     return [];
+    // }
 }
