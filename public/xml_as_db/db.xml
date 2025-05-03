@@ -21,7 +21,7 @@
     <userProfile id="2" idAccount="3">
       <firstName>Peter</firstName>
       <lastName>Jones</lastName>
-      <profilePicture />
+      <profilePicture/>
       <bio>Enthusiast of open source.</bio>
       <joined>2022-11-20</joined>
     </userProfile>
@@ -35,9 +35,37 @@
     <userProfile id="5" idAccount="1">
       <firstName>Peter</firstName>
       <lastName>Jones</lastName>
-      <profilePicture />
+      <profilePicture/>
       <bio>Enthusiast of open source.</bio>
       <joined>2025-04-19</joined>
+    </userProfile>
+    <userProfile id="4" idAccount="1">
+      <firstName>jhon</firstName>
+      <lastName>snow</lastName>
+      <profilePicture/>
+      <bio>Enthusiast of killing dragons.</bio>
+      <joined>2025-05-03</joined>
+    </userProfile>
+    <userProfile id="5" idAccount="1">
+      <firstName>jhon</firstName>
+      <lastName>snow</lastName>
+      <profilePicture/>
+      <bio>Enthusiast of killing dragons.</bio>
+      <joined>2025-05-03</joined>
+    </userProfile>
+    <userProfile id="6" idAccount="1">
+      <firstName>jhon</firstName>
+      <lastName>snow</lastName>
+      <profilePicture/>
+      <bio>Enthusiast of killing dragons.</bio>
+      <joined>2025-05-03</joined>
+    </userProfile>
+    <userProfile id="7" idAccount="1">
+    <firstName>jhon</firstName>
+    <lastName>snow</lastName>
+    <profilePicture/>
+    <bio>Enthusiast of killing dragons.</bio>
+    <joined>2025-05-03</joined>
     </userProfile>
   </userProfiles>
   <topics>

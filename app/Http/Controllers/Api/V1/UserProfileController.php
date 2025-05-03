@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Http\Requests\StoreUserProfileRequest;
 use App\Http\Requests\UpdateUserProfileRequest;
 use App\Http\Resources\V1\ProfileCollection;
@@ -29,6 +30,28 @@ class UserProfileController extends Controller
             ->header('Content-Type', 'application/xml');
     }
 
+
+    public function show(int $id)
+    {
+        try {
+            // Access JWT payload from request attributes
+            $jwtPayload = request()->attributes->get('jwtPayload');
+            Log::debug('JWT Payload:', $jwtPayload ?? ['No JWT payload found']);
+            $account = DB_Utils::getXmlBlocks("//userProfile[@id='$id']")[0] ?? null;
+
+            if (!$account) {
+                return response('<error>Account not found</error>', 404)
+                    ->header('Content-Type', 'application/xml');
+            }
+
+            return response($account, 200)
+                ->header('Content-Type', 'application/xml');
+        } catch (NotFoundHttpException $e) {
+            return response('<error>Account not found</error>', 404)
+                ->header('Content-Type', 'application/xml');
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -44,6 +67,8 @@ class UserProfileController extends Controller
     {
         $newProfile = request()->getContent();
 
+        $jwtPayload = request()->attributes->get('jwtPayload');
+        Log::debug('JWT Payload:', $jwtPayload ?? ['No JWT payload found']);
         if (!$newProfile) {
             return response('<error>No data provided</error>', 400)
                 ->header('Content-Type', 'application/xml');
@@ -57,7 +82,7 @@ class UserProfileController extends Controller
                     ->header('Content-Type', 'application/xml');
             }
 
-            $account = DB_Utils::getXmlBlocks("//account[@id='$idAccount']")[0] ?? null;
+            $account = DB_Utils::getXmlBlocks("//account[@id='$jwtPayload[sub]']")[0] ?? null;
 
             if (!$account) {
                 return response('<error>Account not found</error>', 404)

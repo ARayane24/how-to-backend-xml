@@ -19,7 +19,15 @@ class ourMiddleGuy
     // Note: this just decode the token it doesnt even check the validity of token 
     public function handle(Request $request, Closure $next): Response
     {
+
         $authorizationHeader = $request->header('Authorization');
+
+        $uri = $request->path();
+        $method = $request->method();
+
+        // Log the route information
+        Log::debug("Request to: {$method} {$uri} ");
+
         if ($authorizationHeader && str_starts_with($authorizationHeader, 'Bearer ')) {
             $token = substr($authorizationHeader, 7);
             try {
@@ -39,9 +47,9 @@ class ourMiddleGuy
                                     ->header('Content-Type', 'application/xml');
                             }
                             if ($username && $email) {
-                                Log::info("User authenticated: $username ($email)");
                                 $account = DB_Utils::getXmlBlocks("//account[userName='$username' and email='$email']")[0] ?? null;
                                 if ($account) {
+                                    Log::info("User authenticated: $username ($email)");
                                     $request->attributes->set('jwtPayload', $decodedPayload);
                                 } else {
 
