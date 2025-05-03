@@ -16,6 +16,16 @@
       <password>tupper</password>
       <email>ihatejews@gmail.com</email>
     </account>
+    <account id="4">
+      <userName>new_user</userName>
+      <password>secure_password</password>
+      <email>new_user@example.com</email>
+    </account>
+    <account id="5">
+    <userName>new_user</userName>
+    <password>secure_password</password>
+    <email>new_user@example.com</email>
+</account>
   </accounts>
   <userProfiles>
     <userProfile id="2" idAccount="3">

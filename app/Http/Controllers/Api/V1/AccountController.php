@@ -16,6 +16,7 @@ use Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use function PHPUnit\Framework\throwException;
 // use Illuminate\Http\Response;
+use App\Http\Controllers\Api\V1\DBFunctions;
 
 class AccountController extends Controller
 {
@@ -24,15 +25,17 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $blocks = DB_Utils::getXmlBlocks("//account");
+        $result = DBFunctions::getAll('accounts');
+        return $result;
+        // $blocks = DB_Utils::getXmlBlocks("//account");
 
-        if (!$blocks) {
-            return response('<error>No accounts found</error>', 404)
-                ->header('Content-Type', 'application/xml');
-        }
+        // if (!$blocks) {
+        //     return response('<error>No accounts found</error>', 404)
+        //         ->header('Content-Type', 'application/xml');
+        // }
 
-        return response(implode("\n", $blocks), 200)
-            ->header('Content-Type', 'application/xml');
+        // return response(implode("\n", $blocks), 200)
+        //     ->header('Content-Type', 'application/xml');
     }
 
 
@@ -48,34 +51,36 @@ class AccountController extends Controller
                 ->header('Content-Type', 'application/xml');
         }
 
-        try {
-            $xml = new \SimpleXMLElement($newAccount);
+        // try {
+        $xml = new \SimpleXMLElement($newAccount);
 
-            if (!isset($xml->userName) || !isset($xml->password) || !isset($xml->email)) {
-                return response('<error>Missing required fields</error>', 400)
-                    ->header('Content-Type', 'application/xml');
-            }
-
-            $blocks = DB_Utils::getXmlBlocks("//account");
-            $newId = count($blocks) + 1;
-
-            $newAccount = "<account id=\"$newId\">\n" .
-                "    <userName>{$xml->userName}</userName>\n" .
-                "    <password>{$xml->password}</password>\n" .
-                "    <email>{$xml->email}</email>\n" .
-                "</account>";
-
-            if (DB_Utils::addBlock('/db/accounts', $newAccount)) {
-                return response($newAccount, 201)
-                    ->header('Content-Type', 'application/xml');
-            }
-
-            return response("<error>Could not create the new account</error>", 500)
-                ->header('Content-Type', 'application/xml');
-        } catch (\Exception $e) {
-            return response('<error>Invalid XML format</error>', 400)
+        if (!isset($xml->userName) || !isset($xml->password) || !isset($xml->email)) {
+            return response('<error>Missing required fields</error>', 400)
                 ->header('Content-Type', 'application/xml');
         }
+        $result = DBFunctions::store('accounts', $xml);
+        return $result;
+
+        //     $blocks = DB_Utils::getXmlBlocks("//account");
+        //     $newId = count($blocks) + 1;
+
+        //     $newAccount = "<account id=\"$newId\">\n" .
+        //         "    <userName>{$xml->userName}</userName>\n" .
+        //         "    <password>{$xml->password}</password>\n" .
+        //         "    <email>{$xml->email}</email>\n" .
+        //         "</account>";
+
+        //     if (DB_Utils::addBlock('/db/accounts', $newAccount)) {
+        //         return response($newAccount, 201)
+        //             ->header('Content-Type', 'application/xml');
+        //     }
+
+        //     return response("<error>Could not create the new account</error>", 500)
+        //         ->header('Content-Type', 'application/xml');
+        // } catch (\Exception $e) {
+        //     return response('<error>Invalid XML format</error>', 400)
+        //         ->header('Content-Type', 'application/xml');
+        // }
     }
 
     /**
@@ -83,91 +88,97 @@ class AccountController extends Controller
      */
     public function show(int $id)
     {
-        try {
-            $account = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
+        $result = DBFunctions::getOne('account', $id);
+        return $result;
+        // try {
+        //     $account = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
 
-            if (!$account) {
-                return response('<error>Account not found</error>', 404)
-                    ->header('Content-Type', 'application/xml');
-            }
+        //     if (!$account) {
+        //         return response('<error>Account not found</error>', 404)
+        //             ->header('Content-Type', 'application/xml');
+        //     }
 
-            return response($account, 200)
-                ->header('Content-Type', 'application/xml');
-        } catch (NotFoundHttpException $e) {
-            return response('<error>Account not found</error>', 404)
-                ->header('Content-Type', 'application/xml');
-        }
+        //     return response($account, 200)
+        //         ->header('Content-Type', 'application/xml');
+        // } catch (NotFoundHttpException $e) {
+        //     return response('<error>Account not found</error>', 404)
+        //         ->header('Content-Type', 'application/xml');
+        // }
     }
 
     public function update(int $id)
     {
-        try {
-            $account = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
-            if (!$account) {
-                return response('<error>Account not found</error>', 404)
-                    ->header('Content-Type', 'application/xml');
-            }
+        // try {
+        //     $account = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
+        //     if (!$account) {
+        //         return response('<error>Account not found</error>', 404)
+        //             ->header('Content-Type', 'application/xml');
+        //     }
 
-            $oldXml = new \SimpleXMLElement($account);
+        //     $oldXml = new \SimpleXMLElement($account);
 
-            $updatedAccount = request()->getContent();
-            if (empty($updatedAccount)) {
-                return response('<error>No update data provided</error>', 400)
-                    ->header('Content-Type', 'application/xml');
-            }
-
-            try {
-                $newXml = new \SimpleXMLElement($updatedAccount);
-                if (isset($newXml->userName)) {
-                    $oldXml->userName = (string) $newXml->userName;
-                }
-
-                if (isset($newXml->password)) {
-                    $oldXml->password = (string) $newXml->password;
-                }
-
-                if (isset($newXml->email)) {
-                    $oldXml->email = (string) $newXml->email;
-                }
-
-                $updatedAccount = "<account id=\"$id\">\n" .
-                    "    <userName>{$oldXml->userName}</userName>\n" .
-                    "    <password>{$oldXml->password}</password>\n" .
-                    "    <email>{$oldXml->email}</email>\n" .
-                    "</account>";
-
-                DB_Utils::editBlock("//account[@id='$id']", $updatedAccount);
-                return response($updatedAccount, 200)
-                    ->header('Content-Type', 'application/xml');
-            } catch (\Exception $e) {
-                return response('<error>Invalid XML format in update data</error>', 400)
-                    ->header('Content-Type', 'application/xml');
-            }
-
-        } catch (\Exception $e) {
-            return response('<error>Failed to process update request</error>', 500)
+        $updatedAccount = request()->getContent();
+        if (empty($updatedAccount)) {
+            return response('<error>No update data provided</error>', 400)
                 ->header('Content-Type', 'application/xml');
         }
+
+        // try {
+        $newXml = new \SimpleXMLElement($updatedAccount);
+        $result = DBFunctions::update('account', $id, $newXml);
+        return $result;
+        //     if (isset($newXml->userName)) {
+        //         $oldXml->userName = (string) $newXml->userName;
+        //     }
+
+        //     if (isset($newXml->password)) {
+        //         $oldXml->password = (string) $newXml->password;
+        //     }
+
+        //     if (isset($newXml->email)) {
+        //         $oldXml->email = (string) $newXml->email;
+        //     }
+
+        //     $updatedAccount = "<account id=\"$id\">\n" .
+        //         "    <userName>{$oldXml->userName}</userName>\n" .
+        //         "    <password>{$oldXml->password}</password>\n" .
+        //         "    <email>{$oldXml->email}</email>\n" .
+        //         "</account>";
+
+        //     DB_Utils::editBlock("//account[@id='$id']", $updatedAccount);
+        //     return response($updatedAccount, 200)
+        //         ->header('Content-Type', 'application/xml');
+        // } catch (\Exception $e) {
+        //     return response('<error>Invalid XML format in update data</error>', 400)
+        //         ->header('Content-Type', 'application/xml');
+        // }
+
+        // } catch (\Exception $e) {
+        //     return response('<error>Failed to process update request</error>', 500)
+        //         ->header('Content-Type', 'application/xml');
+        // }
     }
     public function destroy(int $id)
     {
-        try {
-            $accountExists = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
+        $result = DBFunctions::destroy('account', $id);
+        return $result;
+        // try {
+        //     $accountExists = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
 
-            if (!$accountExists) {
-                return response('<error>Account not found</error>', 404)
-                    ->header('Content-Type', 'application/xml');
-            }
+        //     if (!$accountExists) {
+        //         return response('<error>Account not found</error>', 404)
+        //             ->header('Content-Type', 'application/xml');
+        //     }
 
-            DB_Utils::removeBlock("//account[@id='$id']");
+        //     DB_Utils::removeBlock("//account[@id='$id']");
 
-            return response( 204)
-                ->header('Content-Type', 'application/xml');
+        //     return response( 204)
+        //         ->header('Content-Type', 'application/xml');
 
-        } catch (\Exception $e) {
-            error_log("Error deleting account $id: " . $e->getMessage());
-            return response('<error>Failed to process delete request</error>', 500)
-                ->header('Content-Type', 'application/xml');
-        }
+        // } catch (\Exception $e) {
+        //     error_log("Error deleting account $id: " . $e->getMessage());
+        //     return response('<error>Failed to process delete request</error>', 500)
+        //         ->header('Content-Type', 'application/xml');
+        // }
     }
 }
