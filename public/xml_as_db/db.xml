@@ -16,12 +16,22 @@
       <password>tupper</password>
       <email>ihatejews@gmail.com</email>
     </account>
+    <account id="4">
+      <userName>new_user</userName>
+      <password>secure_password</password>
+      <email>new_user@example.com</email>
+    </account>
+    <account id="5">
+    <userName>new_user</userName>
+    <password>secure_password</password>
+    <email>new_user@example.com</email>
+</account>
   </accounts>
   <userProfiles>
     <userProfile id="2" idAccount="3">
       <firstName>Peter</firstName>
       <lastName>Jones</lastName>
-      <profilePicture />
+      <profilePicture/>
       <bio>Enthusiast of open source.</bio>
       <joined>2022-11-20</joined>
     </userProfile>
@@ -35,7 +45,7 @@
     <userProfile id="5" idAccount="1">
       <firstName>Peter</firstName>
       <lastName>Jones</lastName>
-      <profilePicture />
+      <profilePicture/>
       <bio>Enthusiast of open source.</bio>
       <joined>2025-04-19</joined>
     </userProfile>
