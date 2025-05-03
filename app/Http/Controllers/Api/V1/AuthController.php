@@ -356,9 +356,10 @@ class AuthController extends Controller
             ]);
 
             // Generate JWT token
-            $token = Auth::login($account);
+            $token = $this->CreateTemporaryToken($account);
 
             // Return token in XML format
+
             $responseXml = new \SimpleXMLElement('<response></response>');
             $responseXml->addChild('token', $token);
             $responseXml->addChild('tokenType', 'bearer');

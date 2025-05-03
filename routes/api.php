@@ -38,7 +38,7 @@ Route::group(
         Route::put('user-profiles/{id}', [UserProfileController::class, 'update'])->whereNumber('id');
         Route::delete('user-profiles/{id}', [UserProfileController::class, 'destroy'])->whereNumber('id');
 
-        Route::prefix('profiles')->group(function () {
+        Route::prefix('user-profiles')->group(function () {
             Route::get('/', [UserProfileController::class, 'index']);
             Route::get('/{id}', [UserProfileController::class, 'show']);
             Route::post('/', [UserProfileController::class, 'store']);
