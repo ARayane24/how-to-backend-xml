@@ -2,183 +2,275 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-// use App\Http\Requests\StoreAccountRequest;
-// use App\Http\Requests\UpdateAccountRequest;
-// use App\Models\Account;
 use App\Http\Controllers\Controller;
-// use App\Http\Resources\V1\AccountCollection;
-// use App\Http\Resources\V1\AccountResource;
-use App\Utils\DB_Utils;
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Auth;
-// use Illuminate\Http\Response;
-use Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use function PHPUnit\Framework\throwException;
-// use Illuminate\Http\Response;
-use App\Http\Controllers\Api\V1\DBFunctions;
+use App\Models\Account;
+use App\Models\UserProfile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use SimpleXMLElement;
 
 class AccountController extends Controller
 {
     /**
-     * Display all the accounts 
+     * Display all the accounts
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $result = DBFunctions::getAll('accounts');
-        return $result;
-        // $blocks = DB_Utils::getXmlBlocks("//account");
+        // Get all accounts with their profiles
+        $accounts = Account::with('userProfile')->get();
 
-        // if (!$blocks) {
-        //     return response('<error>No accounts found</error>', 404)
-        //         ->header('Content-Type', 'application/xml');
-        // }
+        // Create XML response
+        $xml = new SimpleXMLElement('<accounts></accounts>');
 
-        // return response(implode("\n", $blocks), 200)
-        //     ->header('Content-Type', 'application/xml');
-    }
+        foreach ($accounts as $account) {
+            $accountNode = $xml->addChild('account');
+            $accountNode->addAttribute('id', $account->id);
+            $accountNode->addChild('userName', $account->username);
+            // Don't include the password in responses for security
+            // $accountNode->addChild('password', $account->password);
+            $accountNode->addChild('email', $account->email);
 
-
-    /**
-     * Add a new Account 
-     */
-    public function store()
-    {
-        $newAccount = request()->getContent();
-
-        if (!$newAccount) {
-            return response('<error>No data provided</error>', 400)
-                ->header('Content-Type', 'application/xml');
+            if ($account->userProfile) {
+                $profileNode = $accountNode->addChild('profile');
+                $profileNode->addAttribute('id', $account->userProfile->id);
+                $profileNode->addChild('firstName', $account->userProfile->first_name ?? '');
+                $profileNode->addChild('lastName', $account->userProfile->last_name ?? '');
+                $profileNode->addChild('profilePicture', $account->userProfile->profile_picture ?? '');
+                $profileNode->addChild('bio', $account->userProfile->bio ?? '');
+                $profileNode->addChild('joined', $account->userProfile->joined_date ?? '');
+            }
         }
 
-        // try {
-        $xml = new \SimpleXMLElement($newAccount);
-
-        if (!isset($xml->userName) || !isset($xml->password) || !isset($xml->email)) {
-            return response('<error>Missing required fields</error>', 400)
-                ->header('Content-Type', 'application/xml');
-        }
-        $result = DBFunctions::store('accounts', $xml);
-        return $result;
-
-        //     $blocks = DB_Utils::getXmlBlocks("//account");
-        //     $newId = count($blocks) + 1;
-
-        //     $newAccount = "<account id=\"$newId\">\n" .
-        //         "    <userName>{$xml->userName}</userName>\n" .
-        //         "    <password>{$xml->password}</password>\n" .
-        //         "    <email>{$xml->email}</email>\n" .
-        //         "</account>";
-
-        //     if (DB_Utils::addBlock('/db/accounts', $newAccount)) {
-        //         return response($newAccount, 201)
-        //             ->header('Content-Type', 'application/xml');
-        //     }
-
-        //     return response("<error>Could not create the new account</error>", 500)
-        //         ->header('Content-Type', 'application/xml');
-        // } catch (\Exception $e) {
-        //     return response('<error>Invalid XML format</error>', 400)
-        //         ->header('Content-Type', 'application/xml');
-        // }
+        return response($xml->asXML(), 200)
+            ->header('Content-Type', 'application/xml');
     }
 
     /**
-     * Display a specified account 
+     * Display a specific account
+     *
+     * @param int $id
+     * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show($id)
     {
-        $result = DBFunctions::getOne('account', $id);
-        return $result;
-        // try {
-        //     $account = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
+        // Find the account
+        $account = Account::with('userProfile')->find($id);
 
-        //     if (!$account) {
-        //         return response('<error>Account not found</error>', 404)
-        //             ->header('Content-Type', 'application/xml');
-        //     }
-
-        //     return response($account, 200)
-        //         ->header('Content-Type', 'application/xml');
-        // } catch (NotFoundHttpException $e) {
-        //     return response('<error>Account not found</error>', 404)
-        //         ->header('Content-Type', 'application/xml');
-        // }
-    }
-
-    public function update(int $id)
-    {
-        // try {
-        //     $account = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
-        //     if (!$account) {
-        //         return response('<error>Account not found</error>', 404)
-        //             ->header('Content-Type', 'application/xml');
-        //     }
-
-        //     $oldXml = new \SimpleXMLElement($account);
-
-        $updatedAccount = request()->getContent();
-        if (empty($updatedAccount)) {
-            return response('<error>No update data provided</error>', 400)
+        if (!$account) {
+            return response('<error>Account not found</error>', 404)
                 ->header('Content-Type', 'application/xml');
         }
 
-        // try {
-        $newXml = new \SimpleXMLElement($updatedAccount);
-        $result = DBFunctions::update('account', $id, $newXml);
-        return $result;
-        //     if (isset($newXml->userName)) {
-        //         $oldXml->userName = (string) $newXml->userName;
-        //     }
+        // Create XML response
+        $xml = new SimpleXMLElement('<account></account>');
+        $xml->addAttribute('id', $account->id);
+        $xml->addChild('userName', $account->username);
+        // Don't include password in responses
+        $xml->addChild('email', $account->email);
 
-        //     if (isset($newXml->password)) {
-        //         $oldXml->password = (string) $newXml->password;
-        //     }
+        // Add profile information if available
+        if ($account->userProfile) {
+            $profileNode = $xml->addChild('profile');
+            $profileNode->addAttribute('id', $account->userProfile->id);
+            $profileNode->addChild('firstName', $account->userProfile->first_name ?? '');
+            $profileNode->addChild('lastName', $account->userProfile->last_name ?? '');
+            $profileNode->addChild('profilePicture', $account->userProfile->profile_picture ?? '');
+            $profileNode->addChild('bio', $account->userProfile->bio ?? '');
+            $profileNode->addChild('joined', $account->userProfile->joined_date ?? '');
+        }
 
-        //     if (isset($newXml->email)) {
-        //         $oldXml->email = (string) $newXml->email;
-        //     }
-
-        //     $updatedAccount = "<account id=\"$id\">\n" .
-        //         "    <userName>{$oldXml->userName}</userName>\n" .
-        //         "    <password>{$oldXml->password}</password>\n" .
-        //         "    <email>{$oldXml->email}</email>\n" .
-        //         "</account>";
-
-        //     DB_Utils::editBlock("//account[@id='$id']", $updatedAccount);
-        //     return response($updatedAccount, 200)
-        //         ->header('Content-Type', 'application/xml');
-        // } catch (\Exception $e) {
-        //     return response('<error>Invalid XML format in update data</error>', 400)
-        //         ->header('Content-Type', 'application/xml');
-        // }
-
-        // } catch (\Exception $e) {
-        //     return response('<error>Failed to process update request</error>', 500)
-        //         ->header('Content-Type', 'application/xml');
-        // }
+        return response($xml->asXML(), 200)
+            ->header('Content-Type', 'application/xml');
     }
-    public function destroy(int $id)
+
+    /**
+     * Store a new account
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
-        $result = DBFunctions::destroy('account', $id);
-        return $result;
-        // try {
-        //     $accountExists = DB_Utils::getXmlBlocks("//account[@id='$id']")[0] ?? null;
+        try {
+            // Parse XML input
+            $xmlInput = simplexml_load_string($request->getContent());
 
-        //     if (!$accountExists) {
-        //         return response('<error>Account not found</error>', 404)
-        //             ->header('Content-Type', 'application/xml');
-        //     }
+            if (!isset($xmlInput->userName) || !isset($xmlInput->password) || !isset($xmlInput->email)) {
+                return response('<error>Missing required fields</error>', 400)
+                    ->header('Content-Type', 'application/xml');
+            }
 
-        //     DB_Utils::removeBlock("//account[@id='$id']");
+            // Check for existing email
+            $existingAccount = Account::where('email', (string)$xmlInput->email)->first();
+            if ($existingAccount) {
+                return response('<error>Email already in use</error>', 409)
+                    ->header('Content-Type', 'application/xml');
+            }
 
-        //     return response( 204)
-        //         ->header('Content-Type', 'application/xml');
+            // Create the account
+            $account = Account::create([
+                'username' => (string)$xmlInput->userName,
+                'password' => Hash::make((string)$xmlInput->password), // Hash password for security
+                'email' => (string)$xmlInput->email
+            ]);
 
-        // } catch (\Exception $e) {
-        //     error_log("Error deleting account $id: " . $e->getMessage());
-        //     return response('<error>Failed to process delete request</error>', 500)
-        //         ->header('Content-Type', 'application/xml');
-        // }
+            // Create a basic user profile
+            $profile = new UserProfile([
+                'joined_date' => now()
+            ]);
+
+            // Save the profile and associate with account
+            $account->userProfile()->save($profile);
+
+            // Create XML response
+            $xml = new SimpleXMLElement('<account></account>');
+            $xml->addAttribute('id', $account->id);
+            $xml->addChild('userName', $account->username);
+            // Don't include password in response
+            $xml->addChild('email', $account->email);
+
+            // Add profile info
+            $profileNode = $xml->addChild('profile');
+            $profileNode->addAttribute('id', $profile->id);
+            $profileNode->addChild('firstName', '');
+            $profileNode->addChild('lastName', '');
+            $profileNode->addChild('profilePicture', '');
+            $profileNode->addChild('bio', '');
+            $profileNode->addChild('joined', $profile->joined_date->format('Y-m-d'));
+
+            return response($xml->asXML(), 201)
+                ->header('Content-Type', 'application/xml');
+        } catch (\Exception $e) {
+            return response('<error>' . $e->getMessage() . '</error>', 400)
+                ->header('Content-Type', 'application/xml');
+        }
+    }
+
+    /**
+     * Update an existing account
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            // Find the account
+            $account = Account::find($id);
+
+            if (!$account) {
+                return response('<error>Account not found</error>', 404)
+                    ->header('Content-Type', 'application/xml');
+            }
+
+            // Parse XML input
+            $xmlInput = simplexml_load_string($request->getContent());
+
+            // Update account fields if provided
+            if (isset($xmlInput->userName)) {
+                $account->username = (string)$xmlInput->userName;
+            }
+
+            if (isset($xmlInput->password)) {
+                $account->password = Hash::make((string)$xmlInput->password);
+            }
+
+            if (isset($xmlInput->email)) {
+                // Check if email is already used by another account
+                $existingAccount = Account::where('email', (string)$xmlInput->email)
+                    ->where('id', '!=', $id)
+                    ->first();
+
+                if ($existingAccount) {
+                    return response('<error>Email already in use</error>', 409)
+                        ->header('Content-Type', 'application/xml');
+                }
+
+                $account->email = (string)$xmlInput->email;
+            }
+
+            // Save account changes
+            $account->save();
+
+            // Get or create profile
+            $profile = $account->userProfile;
+            if (!$profile) {
+                $profile = new UserProfile([
+                    'account_id' => $account->id,
+                    'joined_date' => now()
+                ]);
+                $profile->save();
+            }
+
+            // Update profile fields if provided
+            if (isset($xmlInput->profile)) {
+                if (isset($xmlInput->profile->firstName)) {
+                    $profile->first_name = (string)$xmlInput->profile->firstName;
+                }
+
+                if (isset($xmlInput->profile->lastName)) {
+                    $profile->last_name = (string)$xmlInput->profile->lastName;
+                }
+
+                if (isset($xmlInput->profile->profilePicture)) {
+                    $profile->profile_picture = (string)$xmlInput->profile->profilePicture;
+                }
+
+                if (isset($xmlInput->profile->bio)) {
+                    $profile->bio = (string)$xmlInput->profile->bio;
+                }
+
+                // Save profile changes
+                $profile->save();
+            }
+
+            // Create XML response
+            $xml = new SimpleXMLElement('<account></account>');
+            $xml->addAttribute('id', $account->id);
+            $xml->addChild('userName', $account->username);
+            $xml->addChild('email', $account->email);
+
+            // Add profile info
+            $profileNode = $xml->addChild('profile');
+            $profileNode->addAttribute('id', $profile->id);
+            $profileNode->addChild('firstName', $profile->first_name ?? '');
+            $profileNode->addChild('lastName', $profile->last_name ?? '');
+            $profileNode->addChild('profilePicture', $profile->profile_picture ?? '');
+            $profileNode->addChild('bio', $profile->bio ?? '');
+            $profileNode->addChild('joined', $profile->joined_date->format('Y-m-d'));
+
+            return response($xml->asXML(), 200)
+                ->header('Content-Type', 'application/xml');
+        } catch (\Exception $e) {
+            return response('<error>' . $e->getMessage() . '</error>', 400)
+                ->header('Content-Type', 'application/xml');
+        }
+    }
+
+    /**
+     * Delete an account
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $account = Account::find($id);
+
+        if (!$account) {
+            return response('<error>Account not found</error>', 404)
+                ->header('Content-Type', 'application/xml');
+        }
+
+        info($account);
+        -
+        // Account deletion will cascade to profile due to foreign key constraints
+        $account->delete();
+
+        return response('<success>Account deleted successfully</success>', 200)
+            ->header('Content-Type', 'application/xml');
     }
 }
