@@ -307,6 +307,45 @@ class DBFunctions extends Controller
                 if (isset($data->email))
                     $parentNode->email = $data->email;
                 break;
+            case 'userProfile':
+                if (isset($data->firstName))
+                    $parentNode->firstName = $data->firstName;
+                if (isset($data->lastName))
+                    $parentNode->lastName = $data->lastName;
+                if (isset($data->profilePicture))
+                    $parentNode->profilePicture = $data->profilePicture;
+                if (isset($data->bio))
+                    $parentNode->bio = $data->bio;
+                break;
+            case 'topic':
+                if (isset($data->problem))
+                    $parentNode->problem = $data->problem;
+                if (isset($data->description))
+                    $parentNode->description = $data->description;
+                if (isset($data->steps->step)) {
+                    unset($parentNode->steps);
+                    $parentNode->addChild('steps');
+                    foreach ($data->steps->step as $index => $step) {
+                        $stepId = count($parentNode->step) + (int)$index;
+                        $newStepNode = $parentNode->steps->addChild('step');
+                        $newStepNode->addAttribute('id', $stepId);
+                        $newStepNode->addAttribute('idTopic', $id);
+                        if (isset($step->title))
+                            $newStepNode->title = $step->title;
+                        if (isset($step->description))
+                            $newStepNode->description = $step->description;
+                        if (isset($step->updatedAt))
+                            $newStepNode->updatedAt = date('Y-m-d');
+                    }
+                }
+                break;
+            case 'vote':
+                //(!Important)
+                //The only thing editable in the vote is the text inside the isPositive tag
+                if (isset($data->isPositive)) {
+                    $parentNode->isPositive = $data->isPositive;
+                }
+                break;
         }
 
         // Save the updated XML back to the database
@@ -318,7 +357,7 @@ class DBFunctions extends Controller
     }
 
     // * Deleting a specific thing */
-    public static function destroy($parent, $id)
+    public static function destroy($parent, $id, ?int $idAccount = null)
     {
         // Retrieve the XML from the database
         $xmlData = DB::table('dbxml')->where('id', 1)->value('info');
@@ -328,8 +367,13 @@ class DBFunctions extends Controller
         }
         $root = new \SimpleXMLElement($xmlData);
 
-        // Find the parent node (accounts)
-        $parentNode = $root->xpath("//{$parent}[@id='$id']")[0] ?? null;
+        // Find the parent node (account for example)
+        if ($idAccount) {
+            $parent = $parent . "[(@idTopic=$id and @idAccount=$idAccount)]";
+        } else {
+            $parent = $parent . "[@id=$id]";
+        }
+        $parentNode = $root->xpath("//{$parent}")[0] ?? null;
         if (!$parentNode) {
             return response('<error>Parent node not found</error>', 404)
                 ->header('Content-Type', 'application/xml');

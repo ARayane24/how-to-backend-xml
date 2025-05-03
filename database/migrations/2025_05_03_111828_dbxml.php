@@ -13,7 +13,7 @@ class Dbxml extends Migration
     {
         Schema::create('dbxml', function (Blueprint $table) {
             $table->id();
-            $table->xml('info');
+            $table->text('info');
             $table->timestamps();
         });
         //
