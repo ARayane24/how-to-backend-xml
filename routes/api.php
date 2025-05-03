@@ -27,10 +27,13 @@ Route::group(
     ],
     function () {
         // user-profiles
-        Route::apiResource('user-profiles', UserProfileController::class);
-        Route::get('user-profiles', [UserProfileController::class, 'index'])->middleware('ourMiddleGuy');
-        Route::get('user-profiles/{id}', [UserProfileController::class, 'show'])->whereNumber('id');
-        Route::post('user-profiles/{idAccount}', [UserProfileController::class, 'store'])->whereNumber('idAccount');
+        // Route::apiResource('user-profiles', UserProfileController::class);
+        Route::middleware('ourMiddleGuy')->group(function () {
+            Route::get('user-profiles', [UserProfileController::class, 'index']);
+            Route::get('user-profiles/{id}', [UserProfileController::class, 'show'])->whereNumber('id');
+            Route::post('user-profiles/{idAccount}', [UserProfileController::class, 'store'])->whereNumber('idAccount');
+        });
+        // Route::post('user-profiles/{idAccount}', [UserProfileController::class, 'store'])->whereNumber('idAccount');
         Route::put('user-profiles/{id}', [UserProfileController::class, 'update'])->whereNumber('id');
         Route::delete('user-profiles/{id}', [UserProfileController::class, 'destroy'])->whereNumber('id');
         // user-accounts
